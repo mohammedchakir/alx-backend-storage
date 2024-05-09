@@ -1,6 +1,6 @@
 -- SQL script to create the stored procedure ComputeAverageWeightedScoreForUsers
 
-DELIMITER $$
+DELIMITER //
 DROP PROCEDURE IF EXISTS ComputeAverageWeightedScoreForUsers;
 CREATE PROCEDURE ComputeAverageWeightedScoreForUsers()
 BEGIN
@@ -10,5 +10,5 @@ BEGIN
     INNER JOIN projects
     ON projects.id = corrections.project_id
     where corrections.user_id = users.id);
-END $$
+END //
 DELIMITER ;

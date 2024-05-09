@@ -3,29 +3,29 @@
 -- SQL script to create the stored procedure:
 DELIMITER //
 
-CREATE PROCEDURE ComputeAverageScoreForUser (
-    IN user_id INT
-)
+CREATE PROCEDURE ComputeAverageScoreForUser(IN user_id INT)
 BEGIN
     DECLARE total_score FLOAT;
     DECLARE total_projects INT;
-    
-    -- Calculate total score for the user
+    DECLARE average FLOAT;
+
     SELECT SUM(score) INTO total_score
     FROM corrections
     WHERE user_id = user_id;
 
-    -- Calculate total number of projects for the user
     SELECT COUNT(*) INTO total_projects
     FROM corrections
     WHERE user_id = user_id;
 
-    -- Compute average score
     IF total_projects > 0 THEN
-        UPDATE users
-        SET average_score = total_score / total_projects
-        WHERE id = user_id;
+        SET average = total_score / total_projects;
+    ELSE
+        SET average = 0;
     END IF;
+
+    UPDATE users
+    SET average_score = average
+    WHERE id = user_id;
 END;
 //
 

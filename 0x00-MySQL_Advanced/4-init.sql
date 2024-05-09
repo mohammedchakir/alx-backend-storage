@@ -13,25 +13,3 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 
 INSERT INTO items (name) VALUES ("apple"), ("pineapple"), ("pear");
-
-bob@dylan:~$ 
-bob@dylan:~$ cat 4-init.sql | mysql -uroot -p holberton 
-Enter password: 
-bob@dylan:~$ 
-bob@dylan:~$ cat 4-store.sql | mysql -uroot -p holberton 
-Enter password: 
-bob@dylan:~$ 
-bob@dylan:~$ cat 4-main.sql
-Enter password: 
--- Show and add orders
-SELECT * FROM items;
-SELECT * FROM orders;
-
-INSERT INTO orders (item_name, number) VALUES ('apple', 1);
-INSERT INTO orders (item_name, number) VALUES ('apple', 3);
-INSERT INTO orders (item_name, number) VALUES ('pear', 2);
-
-SELECT "--";
-
-SELECT * FROM items;
-SELECT * FROM orders;

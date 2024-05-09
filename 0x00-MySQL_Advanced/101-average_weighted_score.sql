@@ -2,42 +2,70 @@
 
 DELIMITER //
 
-CREATE PROCEDURE ComputeAverageWeightedScoreForUsers ()
+CREATE PROCEDURE ComputeAverageWeightedScoreForUsers()
 BEGIN
-    DECLARE user_id INT;
-    DECLARE done INT DEFAULT FALSE;
-    DECLARE cur CURSOR FOR SELECT id FROM users;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    DECLARE total_weighted_score FLOAT;
+    DECLARE total_weight FLOAT;
+    DECLARE user_id_value INT;
+    DECLARE project_weight INT;
+    DECLARE project_score FLOAT;
 
-    OPEN cur;
-    read_loop: LOOP
-        FETCH cur INTO user_id;
+    -- Initialize variables
+    SET total_weighted_score = 0;
+    SET total_weight = 0;
+
+    -- Cursor to iterate through users
+    DECLARE user_cursor CURSOR FOR
+        SELECT id FROM users;
+    
+    -- Cursor to iterate through projects
+    DECLARE project_cursor CURSOR FOR
+        SELECT project_id, score FROM corrections WHERE user_id = user_id_value;
+
+    -- Declare handlers
+    DECLARE CONTINUE HANDLER FOR NOT FOUND
+        SET done = TRUE;
+
+    -- Start loop for users
+    OPEN user_cursor;
+    user_loop: LOOP
+        FETCH user_cursor INTO user_id_value;
         IF done THEN
-            LEAVE read_loop;
+            LEAVE user_loop;
         END IF;
 
-        DECLARE total_score FLOAT DEFAULT 0;
-        DECLARE total_weight FLOAT DEFAULT 0;
+        -- Reset total_weight for each user
+        SET total_weight = 0;
 
-        -- Calculate the total weighted score for the current user
-        SELECT SUM(c.score * p.weight)
-        INTO total_score
-        FROM corrections c
-        JOIN projects p ON c.project_id = p.id
-        WHERE c.user_id = user_id;
+        -- Start loop for projects
+        OPEN project_cursor;
+        project_loop: LOOP
+            FETCH project_cursor INTO project_id, project_score;
+            IF done THEN
+                LEAVE project_loop;
+            END IF;
 
-        -- Calculate the total weight
-        SELECT SUM(weight)
-        INTO total_weight
-        FROM projects;
+            -- Get the weight of the project
+            SELECT weight INTO project_weight FROM projects WHERE id = project_id;
 
-        -- Calculate the average weighted score
-        UPDATE users
-        SET average_score = total_score / total_weight
-        WHERE id = user_id;
+            -- Update the total weighted score for the user
+            SET total_weighted_score = total_weighted_score + (project_score * project_weight);
+            SET total_weight = total_weight + project_weight;
+        END LOOP project_loop;
 
-    END LOOP;
-    CLOSE cur;
+        -- Close the cursor
+        CLOSE project_cursor;
+
+        -- Calculate the average weighted score and update the users table
+        IF total_weight > 0 THEN
+            UPDATE users SET average_score = total_weighted_score / total_weight WHERE id = user_id_value;
+        ELSE
+            UPDATE users SET average_score = 0 WHERE id = user_id_value;
+        END IF;
+    END LOOP user_loop;
+
+    -- Close the cursor
+    CLOSE user_cursor;
 END //
 
 DELIMITER ;

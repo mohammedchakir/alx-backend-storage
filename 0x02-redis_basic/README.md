@@ -32,11 +32,13 @@ Learn how to use redis as a simple cache
 - A documentation is not a simple word, it’s a real sentence explaining what’s the purpose of the module, class or method (the length of it will be verified)
 - All your functions and coroutines must be type-annotated.
 
-## Install Redis on Ubuntu 18.04
+## Install Redis on Ubuntu 18.04:
 
+```
 $ sudo apt-get -y install redis-server
 $ pip3 install redis
 $ sed -i "s/bind .*/bind 127.0.0.1/g" /etc/redis/redis.conf
+```
 Use Redis in a container
 Redis server is stopped by default - when you are starting a container, you should start it with: service redis-server start
 
@@ -77,7 +79,8 @@ bob@dylan:~$
 ```
 
 - File: `exercise.py`
-   
+
+
 #### [1. Reading from Redis and recovering original type]()
 
 Redis only allows to store string, bytes and numbers (and lists thereof). Whatever you store as single elements, it will be returned as a byte string. Hence if you store "a" as a UTF-8 string, it will be returned as b"a" when retrieved from the server.
@@ -103,7 +106,8 @@ for value, fn in TEST_CASES.items():
     assert cache.get(key, fn=fn) == value
 
 - File: `exercise.py`
-   
+
+
 #### [2. Incrementing values]()
 
 Familiarize yourself with the INCR command and its python equivalent.
@@ -144,7 +148,8 @@ bob@dylan:~$
 ```
 
 - File: `exercise.py`
-   
+
+
 #### [3. Storing lists]()
 
 Familiarize yourself with redis commands RPUSH, LPUSH, LRANGE, etc.
@@ -194,7 +199,8 @@ bob@dylan:~$
 ```
 
 - File: `exercise.py`
-   
+
+
 #### [4. Retrieving lists]()
 
 In this tasks, we will implement a replay function to display the history of calls of a particular function.

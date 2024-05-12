@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""
+Script to add a new attribute to a document in the
+collection school in MongoDB.
+"""
+
+import pymongo
+import sys
+
+
+def update_documents(database_name):
+    """Function to add a new attribute to documents in the
+    collection school in MongoDB."""
+    client = pymongo.MongoClient('mongodb://localhost:27017/')
+    db = client[database_name]
+    collection = db['school']
+    result = collection.update_many(
+        {"name": "Holberton school"},
+        {"$set": {"address": "972 Mission street"}})
+    print(result)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: {} <database_name>".format(sys.argv[0]))
+        sys.exit(1)
+
+    database_name = sys.argv[1]
+    update_documents(database_name)

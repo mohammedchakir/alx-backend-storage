@@ -4,7 +4,6 @@ Script to provide stats about Nginx logs stored in MongoDB.
 """
 
 from pymongo import MongoClient
-from collections import Counter
 
 
 def log_stats():

@@ -1,27 +1,2 @@
-#!/usr/bin/env python3
-"""
-Script to delete all documents with name="Holberton school"
-in the collection school in MongoDB.
-"""
-
-import pymongo
-import sys
-
-
-def delete_documents(database_name):
-    """Function to delete all documents with name="Holberton school"
-    in the collection school in MongoDB."""
-    client = pymongo.MongoClient('mongodb://localhost:27017/')
-    db = client[database_name]
-    collection = db['school']
-    result = collection.delete_many({"name": "Holberton school"})
-    print(result.raw_result)
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: {} <database_name>".format(sys.argv[0]))
-        sys.exit(1)
-
-    database_name = sys.argv[1]
-    delete_documents(database_name)
+// Script to delete all documents with name="Holberton school" in the collection school
+db.school.deleteMany({ "name": "Holberton school" });

@@ -1,19 +1,2 @@
-#!/usr/bin/env python3
-"""
-Script to create or use the database my_db in MongoDB.
-"""
-
-import pymongo
-
-
-def use_or_create_database():
-    """Function to create or use the database my_db in MongoDB."""
-
-    client = pymongo.MongoClient('mongodb://localhost:27017/')
-    db = client['my_db']
-
-    print("switched to db my_db")
-
-
-if __name__ == "__main__":
-    use_or_create_database()
+// Script to create or use the database my_db
+use my_db

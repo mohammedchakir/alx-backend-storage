@@ -1,3 +1,2 @@
 // Script to insert a document into the collection school
-db = db.getSiblingDB(databaseName);
 db.school.insertOne({ "name": "Holberton school" });

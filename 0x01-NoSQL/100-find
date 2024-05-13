@@ -1,0 +1,8 @@
+// Script to list all documents with name starting by Holberton in the collection school
+db = db.getSiblingDB(databaseName);
+var cursor = db.school.find({ "name": /^Holberton/i });
+
+// Iterate over the cursor to print each document
+while (cursor.hasNext()) {
+    printjson(cursor.next());
+}

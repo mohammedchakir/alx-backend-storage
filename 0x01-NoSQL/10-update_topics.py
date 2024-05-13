@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Module to update topics of a school document based on the name.
+Function to update topics of a school document based on the name.
 """
 
 

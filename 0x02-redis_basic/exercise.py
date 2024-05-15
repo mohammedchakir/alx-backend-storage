@@ -7,15 +7,26 @@ import redis
 from functools import wraps
 
 
-def count_calls(method: Callable) -> Callable:
+def call_history(method: Callable) -> Callable:
     """
-    Decorator to count how many times a method of the Cache class is called.
+    Decorator to store the history of inputs and outputs for a function in Redis.
     """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        key = method.__qualname__
-        self._redis.incr(key)
-        return method(self, *args, **kwargs)
+        input_key = "{}:inputs".format(method.__qualname__)
+        output_key = "{}:outputs".format(method.__qualname__)
+
+        # Append input arguments to the Redis list
+        self._redis.rpush(input_key, str(args))
+
+        # Execute the original method to retrieve the output
+        output = method(self, *args, **kwargs)
+
+        # Store the output in the Redis list
+        self._redis.rpush(output_key, output)
+
+        return output
+
     return wrapper
 
 
@@ -28,35 +39,34 @@ class Cache:
         self._redis.flushdb()
 
 
-    @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         Generates a random key and stores the input data in Redis using the key.
+
+        Args:
+            data (Union[str, bytes, int, float]): The data to be stored in the cache.
+
+        Returns:
+            str: The randomly generated key used for storing the data in Redis.
         """
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
 
 
-    def get(self, key: str, fn: Callable = None) -> Union[str, bytes, int, float, None]:
-        """
-        Retrieves data from Redis using the given key and optionally
-        applies a conversion function.
-        """
-        data = self._redis.get(key)
-        if data is None:
-            return None
-        if fn:
-            return fn(data)
-        return data
-
-
 if __name__ == "__main__":
     cache = Cache()
 
-    cache.store(b"first")
-    print(cache.get(cache.store.__qualname__))
+    s1 = cache.store("first")
+    print(s1)
+    s2 = cache.store("secont")
+    print(s2)
+    s3 = cache.store("third")
+    print(s3)
 
-    cache.store(b"second")
-    cache.store(b"third")
-    print(cache.get(cache.store.__qualname__))
+    inputs = cache._redis.lrange("{}:inputs".format(cache.store.__qualname__), 0, -1)
+    outputs = cache._redis.lrange("{}:outputs".format(cache.store.__qualname__), 0, -1)
+
+    print("inputs: {}".format(inputs))
+    print("outputs: {}".format(outputs))

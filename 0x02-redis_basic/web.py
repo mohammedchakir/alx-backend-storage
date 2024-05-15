@@ -39,9 +39,5 @@ def get_page(url: str) -> str:
 
 
 if __name__ == "__main__":
-    # Connect to Redis
-    cache = redis.Redis(host='localhost', port=6379, db=0)
-
-    # Test get_page function
     url = "http://slowwly.robertomurray.co.uk"
     print(get_page(url))

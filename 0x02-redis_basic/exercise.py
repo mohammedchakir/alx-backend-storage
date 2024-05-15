@@ -43,16 +43,29 @@ class Cache:
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         Generates a random key and stores the input data in Redis using the key.
-
-        Args:
-            data (Union[str, bytes, int, float]): The data to be stored in the cache.
-
-        Returns:
-            str: The randomly generated key used for storing the data in Redis.
         """
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
+    
+
+    def replay(func: Callable) -> None:
+        """
+        Displays the history of calls of a particular function.
+
+        Args:
+            func (Callable): The function for which to display the history of calls.
+        """
+        # Retrieve inputs and outputs from Redis lists
+        inputs = cache._redis.lrange("{}:inputs".format(func.__qualname__), 0, -1)
+        outputs = cache._redis.lrange("{}:outputs".format(func.__qualname__), 0, -1)
+
+        # Display the number of calls
+        print(f"{func.__qualname__} was called {len(inputs)} times:")
+
+        # Display inputs and corresponding outputs
+        for input_args, output in zip(inputs, outputs):
+            print(f"{func.__qualname__}(*{input_args.decode('utf-8')}) -> {output.decode('utf-8')}")
 
 
 if __name__ == "__main__":

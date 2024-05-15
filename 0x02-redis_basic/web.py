@@ -9,9 +9,11 @@ from functools import wraps
 
 
 def cache_with_expiry(seconds):
+    """decorator for get_page function"""
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+            """wrapper function"""
             url = args[0]
             cache_key = f"page:{url}"
             count_key = f"count:{url}"
@@ -30,6 +32,7 @@ def cache_with_expiry(seconds):
 
 @cache_with_expiry(10)
 def get_page(url: str) -> str:
+    """get function"""
     response = requests.get(url)
     return response.text
 

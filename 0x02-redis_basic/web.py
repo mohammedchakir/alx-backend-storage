@@ -39,5 +39,4 @@ def get_page(url: str) -> str:
 
 
 if __name__ == "__main__":
-    url = "http://slowwly.robertomurray.co.uk"
-    print(get_page(url))
+    get_page('http://slowwly.robertomurray.co.uk')

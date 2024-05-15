@@ -1,36 +1,40 @@
 #!/usr/bin/env python3
 """
-web cache and tracker
+This function fetches the HTML content
+of a URL using the requests module
 """
 import requests
 import redis
 from functools import wraps
 
-store = redis.Redis()
+
+def cache_with_expiry(seconds):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            url = args[0]
+            cache_key = f"page:{url}"
+            count_key = f"count:{url}"
+            cached_content = cache.get(cache_key)
+            if cached_content:
+                cache.incr(count_key)
+                return cached_content.decode("utf-8")
+            page_content = func(*args, **kwargs)
+            cache.setex(cache_key, seconds, page_content)
+            cache.setnx(count_key, 0)
+            cache.incr(count_key)
+            return page_content
+        return wrapper
+    return decorator
 
 
-def count_url_access(method):
-    """ Decorator counting how many times
-    a URL is accessed """
-    @wraps(method)
-    def wrapper(url):
-        cached_key = "cached:" + url
-        cached_data = store.get(cached_key)
-        if cached_data:
-            return cached_data.decode("utf-8")
-
-        count_key = "count:" + url
-        html = method(url)
-
-        store.incr(count_key)
-        store.set(cached_key, html)
-        store.expire(cached_key, 10)
-        return html
-    return wrapper
-
-
-@count_url_access
+@cache_with_expiry(10)
 def get_page(url: str) -> str:
-    """ Returns HTML content of a url """
-    res = requests.get(url)
-    return res.text
+    response = requests.get(url)
+    return response.text
+
+
+if __name__ == "__main__":
+    cache = redis.Redis(host='localhost', port=6379, db=0)
+    url = "http://slowwly.robertomurray.co.uk"
+    print(get_page(url))

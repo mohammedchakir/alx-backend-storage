@@ -41,6 +41,10 @@ def cache_with_expiry(seconds):
     return decorator
 
 
+# Connect to Redis
+cache = redis.Redis(host='localhost', port=6379, db=0)
+
+
 @cache_with_expiry(10)
 def get_page(url: str) -> str:
     response = requests.get(url)

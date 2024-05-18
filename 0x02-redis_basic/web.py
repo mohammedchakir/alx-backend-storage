@@ -19,12 +19,12 @@ def cache_with_expiry(seconds):
             count_key = f"count:{url}"
             cached_content = cache.get(cache_key)
             if cached_content:
-                cache.incr(count_key)
+                cache.incr(count_key, 1)
                 return cached_content.decode("utf-8")
             page_content = func(*args, **kwargs)
             cache.setex(cache_key, seconds, page_content)
-            cache.setnx(count_key, 0)
-            cache.incr(count_key)
+            cache.expire(cache_key, seconds)
+            cache.incr(count_key, 1)
             return page_content
         return wrapper
     return decorator

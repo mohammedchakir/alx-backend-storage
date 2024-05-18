@@ -30,15 +30,16 @@ def url_access_count(method):
         key = "cached:" + url
         cached_value = r.get(key)
         if cached_value:
+            key_count = "count:" + url
+            r.incr(key_count, 1)  # Increment count
             return cached_value.decode("utf-8")
 
-            # Get new content and update cache
+        # Get new content and update cache
         key_count = "count:" + url
         html_content = method(url)
 
-        r.incr(key_count)
-        r.set(key, html_content, ex=10)
-        r.expire(key, 10)
+        r.incr(key_count, 1)  # Increment count
+        r.setex(key, 10, html_content)  # Set cache with expiration time
         return html_content
     return wrapper
 

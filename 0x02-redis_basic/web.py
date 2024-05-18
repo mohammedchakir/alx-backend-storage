@@ -29,20 +29,32 @@ def cache_with_expiry(seconds):
             """Wrapper function"""
             key = f"cached:{url}"
             count_key = f"count:{url}"
-            cached_value = r.get(key)
-            if cached_value:
-                # If cached value exists, update count and return cached value
-                r.incr(count_key, 1)
-                return cached_value.decode("utf-8")
+            with r.pipeline() as pipe:
+                while True:
+                    try:
+                        pipe.watch(key)
+                        cached_value = pipe.get(key)
+                        if cached_value:
+                            pipe.multi()
+                            pipe.incr(count_key, 1)
+                            pipe.expire(key, seconds)
+                            pipe.execute()
+                            return cached_value.decode("utf-8")
 
-            # If not cached, fetch new content
-            html_content = func(url)
+                        # If not cached, fetch new content
+                        html_content = func(url)
 
-            # Set cache with expiration time and update count
-            r.setex(key, seconds, html_content)
-            r.incr(count_key, 1)
+                        # Set cache with expiration time and update count
+                        pipe.multi()
+                        pipe.setex(key, seconds, html_content)
+                        pipe.incr(count_key, 1)
+                        pipe.execute()
 
-            return html_content
+                        return html_content
+                    except redis.WatchError:
+                        continue
+                    finally:
+                        pipe.reset()
         return wrapper
     return decorator
 
